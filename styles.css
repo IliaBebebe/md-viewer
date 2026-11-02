@@ -182,7 +182,7 @@ html, body {
   user-select: none;
   z-index: 50;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .header-left, .header-center, .header-right {
@@ -450,7 +450,7 @@ html, body {
   display: none;
   flex-direction: column;
   gap: 2px;
-  z-index: 100;
+  z-index: 1000;
   backdrop-filter: blur(16px);
 }
 

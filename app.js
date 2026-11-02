@@ -1218,12 +1218,16 @@ $$
     // Samples Dropdown
     els.btnSamplesDropdown.addEventListener('click', (e) => {
       e.stopPropagation();
+      const isOpen = els.samplesMenu.classList.contains('active');
       closeAllDropdowns();
-      els.samplesMenu.classList.toggle('active');
+      if (!isOpen) {
+        els.samplesMenu.classList.add('active');
+      }
     });
 
     document.querySelectorAll('[data-sample]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const key = btn.dataset.sample;
         const titles = {
           showcase: 'Обзор возможностей',
@@ -1241,31 +1245,39 @@ $$
     // Export Dropdown
     els.btnExportDropdown.addEventListener('click', (e) => {
       e.stopPropagation();
+      const isOpen = els.exportMenu.classList.contains('active');
       closeAllDropdowns();
-      els.exportMenu.classList.toggle('active');
+      if (!isOpen) {
+        els.exportMenu.classList.add('active');
+      }
     });
 
-    els.btnExportMD.addEventListener('click', () => {
+    els.btnExportMD.addEventListener('click', (e) => {
+      e.stopPropagation();
       exportAsMarkdown();
       closeAllDropdowns();
     });
 
-    els.btnExportHTML.addEventListener('click', () => {
+    els.btnExportHTML.addEventListener('click', (e) => {
+      e.stopPropagation();
       exportAsHtml();
       closeAllDropdowns();
     });
 
-    els.btnPrintPDF.addEventListener('click', () => {
+    els.btnPrintPDF.addEventListener('click', (e) => {
+      e.stopPropagation();
       closeAllDropdowns();
       window.print();
     });
 
-    els.btnCopyMD.addEventListener('click', () => {
+    els.btnCopyMD.addEventListener('click', (e) => {
+      e.stopPropagation();
       copyMarkdown();
       closeAllDropdowns();
     });
 
-    els.btnCopyHTML.addEventListener('click', () => {
+    els.btnCopyHTML.addEventListener('click', (e) => {
+      e.stopPropagation();
       copyHtml();
       closeAllDropdowns();
     });
@@ -1273,20 +1285,35 @@ $$
     // Settings Dropdown
     els.btnSettingsDropdown.addEventListener('click', (e) => {
       e.stopPropagation();
+      const isOpen = els.settingsMenu.classList.contains('active');
       closeAllDropdowns();
-      els.settingsMenu.classList.toggle('active');
+      if (!isOpen) {
+        els.settingsMenu.classList.add('active');
+      }
     });
 
     document.querySelectorAll('[data-theme-val]').forEach(btn => {
-      btn.addEventListener('click', () => applyTheme(btn.dataset.themeVal));
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        applyTheme(btn.dataset.themeVal);
+        closeAllDropdowns();
+      });
     });
 
     document.querySelectorAll('[data-font-val]').forEach(btn => {
-      btn.addEventListener('click', () => applyFont(btn.dataset.fontVal));
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        applyFont(btn.dataset.fontVal);
+        closeAllDropdowns();
+      });
     });
 
     document.querySelectorAll('[data-width-val]').forEach(btn => {
-      btn.addEventListener('click', () => applyReaderWidth(btn.dataset.widthVal));
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        applyReaderWidth(btn.dataset.widthVal);
+        closeAllDropdowns();
+      });
     });
 
     // Close dropdowns on outside click
