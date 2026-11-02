@@ -309,7 +309,9 @@ $$
     btnFormatItalic: document.getElementById('btnFormatItalic'),
     btnFormatCode: document.getElementById('btnFormatCode'),
     btnFormatTable: document.getElementById('btnFormatTable'),
-    btnClearEditor: document.getElementById('btnClearEditor')
+    btnClearEditor: document.getElementById('btnClearEditor'),
+    drawerBackdrop: document.getElementById('drawerBackdrop'),
+    menuBackdrop: document.getElementById('menuBackdrop')
   };
 
   // --- Storage & Initialization ---
@@ -326,11 +328,14 @@ $$
   }
 
   function loadSettings() {
+    const isMobile = window.innerWidth <= 899;
     state.theme = localStorage.getItem('rex_md_theme') || 'obsidian';
     state.font = localStorage.getItem('rex_md_font') || 'sans';
-    state.mode = localStorage.getItem('rex_md_mode') || 'reader';
+    state.mode = localStorage.getItem('rex_md_mode') || (isMobile ? 'reader' : 'split');
     state.readerWidth = localStorage.getItem('rex_md_width') || '820px';
-    state.isOutlineOpen = localStorage.getItem('rex_md_outline') !== 'false';
+    state.isOutlineOpen = localStorage.getItem('rex_md_outline') !== null
+      ? localStorage.getItem('rex_md_outline') === 'true'
+      : !isMobile;
 
     applyTheme(state.theme);
     applyFont(state.font);
@@ -731,6 +736,9 @@ $$
         // Update active class
         document.querySelectorAll('.toc-item').forEach(el => el.classList.remove('active'));
         li.classList.add('active');
+        if (window.innerWidth <= 899) {
+          setOutlineVisible(false);
+        }
       });
 
       li.appendChild(a);
@@ -1110,6 +1118,9 @@ $$
     state.isOutlineOpen = visible;
     localStorage.setItem('rex_md_outline', visible);
     els.outlineDrawer.classList.toggle('collapsed', !visible);
+    if (els.drawerBackdrop) {
+      els.drawerBackdrop.classList.toggle('active', visible && window.innerWidth <= 899);
+    }
   }
 
   // --- Splitter Drag Logic ---
@@ -1215,14 +1226,21 @@ $$
     // Drag and Drop
     setupDragAndDrop();
 
+    function toggleDropdown(menu) {
+      const isOpen = menu.classList.contains('active');
+      closeAllDropdowns();
+      if (!isOpen) {
+        menu.classList.add('active');
+        if (els.menuBackdrop && window.innerWidth <= 640) {
+          els.menuBackdrop.classList.add('active');
+        }
+      }
+    }
+
     // Samples Dropdown
     els.btnSamplesDropdown.addEventListener('click', (e) => {
       e.stopPropagation();
-      const isOpen = els.samplesMenu.classList.contains('active');
-      closeAllDropdowns();
-      if (!isOpen) {
-        els.samplesMenu.classList.add('active');
-      }
+      toggleDropdown(els.samplesMenu);
     });
 
     document.querySelectorAll('[data-sample]').forEach(btn => {
@@ -1245,11 +1263,7 @@ $$
     // Export Dropdown
     els.btnExportDropdown.addEventListener('click', (e) => {
       e.stopPropagation();
-      const isOpen = els.exportMenu.classList.contains('active');
-      closeAllDropdowns();
-      if (!isOpen) {
-        els.exportMenu.classList.add('active');
-      }
+      toggleDropdown(els.exportMenu);
     });
 
     els.btnExportMD.addEventListener('click', (e) => {
@@ -1285,11 +1299,7 @@ $$
     // Settings Dropdown
     els.btnSettingsDropdown.addEventListener('click', (e) => {
       e.stopPropagation();
-      const isOpen = els.settingsMenu.classList.contains('active');
-      closeAllDropdowns();
-      if (!isOpen) {
-        els.settingsMenu.classList.add('active');
-      }
+      toggleDropdown(els.settingsMenu);
     });
 
     document.querySelectorAll('[data-theme-val]').forEach(btn => {
@@ -1335,6 +1345,14 @@ $$
     els.btnCloseOutline.addEventListener('click', () => {
       setOutlineVisible(false);
     });
+
+    // Mobile backdrops
+    if (els.drawerBackdrop) {
+      els.drawerBackdrop.addEventListener('click', () => setOutlineVisible(false));
+    }
+    if (els.menuBackdrop) {
+      els.menuBackdrop.addEventListener('click', closeAllDropdowns);
+    }
 
     // Shortcuts Modal
     els.btnShortcuts.addEventListener('click', () => {
@@ -1422,6 +1440,9 @@ $$
     els.samplesMenu.classList.remove('active');
     els.exportMenu.classList.remove('active');
     els.settingsMenu.classList.remove('active');
+    if (els.menuBackdrop) {
+      els.menuBackdrop.classList.remove('active');
+    }
   }
 
   // --- Toast Notifications ---

@@ -2,7 +2,7 @@
 <html lang="ru" data-theme="obsidian" data-mode="split" data-font="sans">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>REX MD-Viewer — Премиальный просмотрщик Markdown</title>
   <meta name="description" content="Быстрый, эстетичный и функциональный Markdown-ридер и редактор с поддержкой GFM, KaTeX формул, диаграмм Mermaid, подсветки кода и перетаскивания файлов.">
   <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
@@ -28,8 +28,9 @@
 
   <!-- App Header & Toolbar -->
   <header class="app-header" role="banner">
-    <!-- Left: Brand & Document Tabs -->
-    <div class="header-left">
+    <div class="header-main">
+      <!-- Left: Brand -->
+      <div class="header-left">
       <a href="https://hub.rexcorp.space/" class="brand" title="REX Corp Hub" target="_blank" rel="noopener">
         <div class="brand-icon" aria-hidden="true">
           <!-- Document Vector Icon -->
@@ -44,17 +45,6 @@
         <span class="brand-name">REX <span style="color: var(--accent-primary);">MD</span></span>
         <span class="brand-badge">Viewer</span>
       </a>
-
-      <!-- Document Tabs Container -->
-      <nav class="tabs-container" id="tabsContainer" aria-label="Открытые документы"></nav>
-
-      <!-- New Tab / Document Button -->
-      <button class="btn-new-tab" id="btnNewDoc" title="Новый документ (Ctrl+N)" aria-label="Новый документ">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-      </button>
     </div>
 
     <!-- Center: View Mode Segmented Control -->
@@ -262,7 +252,20 @@
         </svg>
       </button>
     </div>
-  </header>
+  </div>
+
+  <!-- Tabs Strip -->
+  <div class="tabs-strip" id="tabsStrip">
+    <nav class="tabs-container" id="tabsContainer" aria-label="Открытые документы"></nav>
+    <button class="btn-new-tab" id="btnNewDoc" title="Новый документ (Ctrl+N)" aria-label="Новый документ">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile Overlays & Backdrops -->
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<div class="menu-backdrop" id="menuBackdrop"></div>
 
   <!-- Workspace Container -->
   <main class="app-workspace" role="main">
