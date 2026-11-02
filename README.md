@@ -1,8 +1,9 @@
 # REX MD-Viewer
 
-> Премиальный веб-ридер и редактор Markdown для GitHub Pages. Закидывай текст или перетаскивай файлы и читай с идеальной типографикой.
+> Премиальный веб-ридер и редактор Markdown для экосистемы REX Corp. Закидывай текст или перетаскивай файлы и читай с идеальной типографикой.
 
-**Публичный адрес:** [https://iliabebebe.github.io/md-viewer/](https://iliabebebe.github.io/md-viewer/)  
+**Публичный адрес:** [https://md-viewer.rexcorp.space/](https://md-viewer.rexcorp.space/)  
+**Зеркало:** [https://iliabebebe.github.io/md-viewer/](https://iliabebebe.github.io/md-viewer/)  
 **Каталог проектов:** [https://hub.rexcorp.space/](https://hub.rexcorp.space/)  
 
 ---
@@ -42,7 +43,9 @@
 
 ## Архитектура и развёртывание
 
-Проект построен как легковесный клиентский Single Page Application (SPA) без серверного бэкенда и компиляторов:
-- **Хостинг:** GitHub Pages (`gh-pages` / `main`).
-- **Синхронизация:** Домашний bare-репозиторий на VPS `rex-home-deploy:/srv/git/md-viewer.git`.
+Проект построен как легковесный клиентский Single Page Application (SPA):
+- **Основной хостинг:** Домашний VPS REX Corp (`/var/www/md-viewer/public`) под управлением Nginx и Cloudflare Tunnel.
+- **Git-деплой:** При пуше в `vps/main` автоматический post-receive hook обновляет runtime на сервере.
+- **Публичный адрес:** [https://md-viewer.rexcorp.space/](https://md-viewer.rexcorp.space/).
+- **Зеркало:** GitHub Pages (`origin/main`).
 - **Каталог:** Зарегистрирован в REX Hub.
