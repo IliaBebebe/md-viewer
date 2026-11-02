@@ -409,7 +409,7 @@ $$
               <span>Копировать</span>
             </button>
           </div>
-          <pre><code class="language-${escapeHtml(language)}">${highlighted}</code></pre>
+          <pre><code class="hljs language-${escapeHtml(language)}">${highlighted}</code></pre>
         </div>
       `;
     };
@@ -1313,6 +1313,15 @@ $$
         e.stopPropagation();
         applyReaderWidth(btn.dataset.widthVal);
         closeAllDropdowns();
+      });
+    });
+
+    // Prevent clicks inside dropdown menus from closing them unless an action button/link is clicked
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+      menu.addEventListener('click', (e) => {
+        if (!e.target.closest('button, a')) {
+          e.stopPropagation();
+        }
       });
     });
 
