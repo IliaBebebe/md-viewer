@@ -431,17 +431,18 @@ $$
       `;
     };
 
-    // Custom list item renderer for task lists
-    renderer.listitem = function ({ text, task, checked }) {
-      if (task) {
+    // Custom list item renderer with full inline token parsing
+    renderer.listitem = function (item) {
+      const body = this.parser.parseInline(item.tokens || []);
+      if (item.task) {
         return `
           <li class="task-list-item">
-            <input type="checkbox" class="task-checkbox" ${checked ? 'checked' : ''} aria-label="Задача">
-            <span>${text}</span>
+            <input type="checkbox" class="task-checkbox" ${item.checked ? 'checked' : ''} aria-label="Задача">
+            <span>${body}</span>
           </li>
         `;
       }
-      return `<li>${text}</li>`;
+      return `<li>${body}</li>\n`;
     };
 
     marked.setOptions({
@@ -487,7 +488,63 @@ $$
 
     let rawMarkdown = doc.content || '';
 
-    // Transform Markdown with marked
+    // 1. Normalize unicode bullets at line start (•, ⁃, ◦, ▪) to standard list items
+    rawMarkdown = rawMarkdown.replace(/^([ \t]*)[•⁃◦▪][ \t]+/gm, '$1- ');
+
+    // 2. Protect fenced code blocks and inline code from math/formula regex
+    const codeProtector = [];
+    rawMarkdown = rawMarkdown.replace(/(```[\s\S]*?```|`[^`\n]+`)/g, (match) => {
+      const idx = codeProtector.length;
+      codeProtector.push(match);
+      return `%%REX_CODE_HOLD_${idx}%%`;
+    });
+
+    // 3. Extract and pre-render Block Math: $$...$$
+    const mathBlocks = [];
+    rawMarkdown = rawMarkdown.replace(/\$\$([\s\S]+?)\$\$/g, (match, formula) => {
+      const idx = mathBlocks.length;
+      let rendered = '';
+      try {
+        if (typeof katex !== 'undefined') {
+          rendered = katex.renderToString(formula.trim(), {
+            displayMode: true,
+            throwOnError: false
+          });
+        } else {
+          rendered = formula;
+        }
+      } catch (err) {
+        rendered = `<div class="katex-error">${escapeHtml(err.message)}</div>`;
+      }
+      mathBlocks.push(rendered);
+      return `\n\n@@REX_MATH_BLOCK_${idx}@@\n\n`;
+    });
+
+    // 4. Extract and pre-render Inline Math: $...$
+    const mathInlines = [];
+    rawMarkdown = rawMarkdown.replace(/(?<!\\)\$(?!\s)([^\$\n]+?)(?<!\s)(?<!\\)\$/g, (match, formula) => {
+      const idx = mathInlines.length;
+      let rendered = '';
+      try {
+        if (typeof katex !== 'undefined') {
+          rendered = katex.renderToString(formula.trim(), {
+            displayMode: false,
+            throwOnError: false
+          });
+        } else {
+          rendered = formula;
+        }
+      } catch (err) {
+        rendered = match;
+      }
+      mathInlines.push(rendered);
+      return `@@REX_MATH_INLINE_${idx}@@`;
+    });
+
+    // 5. Restore code blocks before marked parsing
+    rawMarkdown = rawMarkdown.replace(/%%REX_CODE_HOLD_(\d+)%%/g, (m, id) => codeProtector[Number(id)]);
+
+    // 6. Transform Markdown with marked
     let parsedHtml = '';
     try {
       parsedHtml = marked.parse(rawMarkdown);
@@ -495,14 +552,24 @@ $$
       parsedHtml = `<div class="callout callout-caution"><div class="callout-header">Ошибка синтаксиса</div><div class="callout-content">${escapeHtml(err.message)}</div></div>`;
     }
 
-    // Transform GitHub Admonitions
+    // 7. Restore Block Math
+    parsedHtml = parsedHtml.replace(/<p>\s*@@REX_MATH_BLOCK_(\d+)@@\s*<\/p>/g, (m, id) => {
+      return `<div class="katex-display-wrapper">${mathBlocks[Number(id)]}</div>`;
+    });
+    parsedHtml = parsedHtml.replace(/@@REX_MATH_BLOCK_(\d+)@@/g, (m, id) => {
+      return `<div class="katex-display-wrapper">${mathBlocks[Number(id)]}</div>`;
+    });
+
+    // 8. Restore Inline Math
+    parsedHtml = parsedHtml.replace(/@@REX_MATH_INLINE_(\d+)@@/g, (m, id) => {
+      return mathInlines[Number(id)];
+    });
+
+    // 9. Transform GitHub Admonitions
     parsedHtml = transformCallouts(parsedHtml);
 
     // Inject into preview
     els.previewContent.innerHTML = parsedHtml;
-
-    // Render KaTeX Math
-    renderKaTeXMath();
 
     // Render Mermaid diagrams
     renderMermaidDiagrams();
@@ -517,7 +584,7 @@ $$
     buildTOC();
 
     // Update document statistics
-    updateDocumentStats(rawMarkdown);
+    updateDocumentStats(doc.content || '');
   }
 
   // Transform GitHub callouts: > [!NOTE], > [!TIP], etc.
